@@ -48,7 +48,7 @@ class StreamingHttpHandler(BaseHTTPRequestHandler):
             content_type = 'text/html; charset=utf-8'
             tpl = Template(self.server.index_template)
             content = tpl.safe_substitute(dict(
-                ADDRESS='%s:%d' % (self.request.getsockname()[0], WS_PORT),
+                ADDRESS=WS_PORT,
                 WIDTH=WIDTH, HEIGHT=HEIGHT, COLOR=COLOR, BGCOLOR=BGCOLOR))
         else:
             self.send_error(404, 'File not found')
@@ -122,6 +122,35 @@ class BroadcastThread(Thread):
             self.converter.stdout.close()
 
 
+class JasonsWebSocketWSGIHandler(WebSocketWSGIHandler):
+    def setup_environ(self):
+        """
+        Setup the environ dictionary and add the
+        `'ws4py.socket'` key. Its associated value
+        is the real socket underlying socket.
+        """
+        SimpleHandler.setup_environ(self)
+        self.environ['ws4py.socket'] = get_connection(self.environ['wsgi.input'])
+        self.http_version = 1.1
+
+class JasonsWebSocketRequestHandler(WebSocketWSGIRequestHandler):
+    def handle(self):
+        """
+        Unfortunately the base class forces us
+        to override the whole method to actually provide our wsgi handler.
+        """
+        self.raw_requestline = self.rfile.readline()
+        if not self.parse_request(): # An error code has been sent, just exit
+            return
+
+        # next line is where we'd have expect a configuration key somehow
+        handler = JasonsWebSocketWSGIHandler(
+            self.rfile, self.wfile, self.get_stderr(), self.get_environ()
+        )
+        handler.request_handler = self      # backpointer for logging
+        handler.run(self.server.get_app())
+
+
 def main():
     print('Initializing camera')
     with picamera.PiCamera() as camera:
@@ -132,7 +161,7 @@ def main():
         websocket_server = make_server(
             '', WS_PORT,
             server_class=WSGIServer,
-            handler_class=WebSocketWSGIRequestHandler,
+            handler_class=JasonsWebSocketRequestHandler,
             app=WebSocketWSGIApplication(handler_cls=StreamingWebSocket))
         websocket_server.initialize_websockets_manager()
         websocket_thread = Thread(target=websocket_server.serve_forever)
