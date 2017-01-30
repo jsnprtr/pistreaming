@@ -12,6 +12,7 @@ from time import sleep, time
 from http.server import HTTPServer, BaseHTTPRequestHandler
 from wsgiref.simple_server import make_server
 from wsgiref.handlers import SimpleHandler
+from ws4py.compat import get_connection
 
 import picamera
 from ws4py.websocket import WebSocket
