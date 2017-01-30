@@ -11,6 +11,7 @@ from threading import Thread
 from time import sleep, time
 from http.server import HTTPServer, BaseHTTPRequestHandler
 from wsgiref.simple_server import make_server
+from wsgiref.handlers import SimpleHandler
 
 import picamera
 from ws4py.websocket import WebSocket
