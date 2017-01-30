@@ -156,6 +156,7 @@ class JasonsWebSocketRequestHandler(WebSocketWSGIRequestHandler):
 def main():
     print('Initializing camera')
     with picamera.PiCamera() as camera:
+        camera.rotation = 180
         camera.resolution = (WIDTH, HEIGHT)
         camera.framerate = FRAMERATE
         sleep(1) # camera warm-up time
