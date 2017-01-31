@@ -41,14 +41,15 @@ class StreamingHttpHandler(BaseHTTPRequestHandler):
         self.do_GET()
 
     def do_GET(self):
+        url = urlparse(self.path)
         if self.path == '/':
             self.send_response(301)
             self.send_header('Location', '/index.html')
             self.end_headers()
             return
-        elif self.path == '/move':
+        elif url.path == '/move':
             try:
-                data = {k: int(v[0]) for k, v in parse_qs(self.query).items()}
+                data = {k: int(v[0]) for k, v in parse_qs(url.query).items()}
                 print("data is: ")
                 print(data)
             except (IndexError, ValueError) as e:
@@ -67,7 +68,7 @@ class StreamingHttpHandler(BaseHTTPRequestHandler):
                 self.send_response(200)
                 self.end_headers()
             return
-        elif self.path == '/stop':
+        elif url.path == '/stop':
             eh.motor.one.stop()
             eh.motor.two.stop()
             self.send_response(200)
