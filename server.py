@@ -66,6 +66,9 @@ class StreamingHttpHandler(BaseHTTPRequestHandler):
         elif self.path == '/stop':
             eh.motor.one.stop()
             eh.motor.two.stop()
+            self.send_response(200)
+            self.end_headers()
+            return
         elif self.path == '/jsmpg.js':
             content_type = 'application/javascript'
             content = self.server.jsmpg_content
@@ -223,7 +226,7 @@ def main():
             http_thread.join()
             print('Waiting for websockets thread to finish')
             websocket_thread.join()
-            print('Stopping motoros')
+            print('Stopping motors')
             eh.motor.one.stop()
             eh.motor.two.stop()
 
