@@ -41,6 +41,27 @@
 		// Setup the WebSocket connection and start the player
 		var client = new WebSocket('ws://' + window.location.hostname + ':${ADDRESS}/');
 		var player = new jsmpeg(client, {canvas:canvas});
+
+		window.onkeydown = function(e){
+			var keyCode = e.keyCode ? e.keyCode : e.which;
+			var direction = "";
+
+			if(keyCode === 38){
+				direction = forward;
+			} else if(keyCode === 40){
+				direction = backward;
+			}
+
+			var xhr = new XMLHttpRequest();
+			xhr.open('GET', '/move?direction=' + direction + '&');
+			xhr.send();
+		};
+
+		window.onkeyup = function(e){
+			var xhr = new XMLHttpRequest();
+			xhr.open('GET', '/stop');
+			xhr.send();
+		};		
 	</script>
 </body>
 </html>

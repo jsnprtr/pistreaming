@@ -13,11 +13,14 @@ from http.server import HTTPServer, BaseHTTPRequestHandler
 from wsgiref.simple_server import make_server
 from wsgiref.handlers import SimpleHandler
 from ws4py.compat import get_connection
+from urllib.parse import urlparse, parse_qs
 
 import picamera
 from ws4py.websocket import WebSocket
 from ws4py.server.wsgirefserver import WSGIServer, WebSocketWSGIRequestHandler, WebSocketWSGIHandler
 from ws4py.server.wsgiutils import WebSocketWSGIApplication
+
+import explorerhat as eh
 
 ###########################################
 # CONFIGURATION
@@ -43,6 +46,26 @@ class StreamingHttpHandler(BaseHTTPRequestHandler):
             self.send_header('Location', '/index.html')
             self.end_headers()
             return
+        elif url.path == '/move':
+            try:
+                data = {k: int(v[0]) for k, v in parse_qs(url.query).items()}
+            except (IndexError, ValueError) as e:
+                self.send_error(400, str(e))
+            else:
+                if 'direction' in data:
+                    direction = -data['direction']
+                    if direction == 'forwards':
+                        eh.motor.one.forwards()
+                        eh.motor.two.forwards()
+                    elif direction == 'backwards':
+                        eh.motor.one.backwards()
+                        eh.motor.two.backwards()
+                self.send_response(200)
+                self.end_headers()
+            return
+        elif url.path == '/stop':
+            eh.motor.one.stop()
+            eh.motor.two.stop()
         elif self.path == '/jsmpg.js':
             content_type = 'application/javascript'
             content = self.server.jsmpg_content
@@ -200,6 +223,9 @@ def main():
             http_thread.join()
             print('Waiting for websockets thread to finish')
             websocket_thread.join()
+            print('Stopping motoros')
+            eh.motor.one.stop()
+            eh.motor.two.stop()
 
 
 if __name__ == '__main__':
