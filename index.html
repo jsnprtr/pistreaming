@@ -46,8 +46,6 @@
 			var keyCode = e.keyCode ? e.keyCode : e.which;
 			var direction = "";
 
-			moving = true;
-
 			if(keyCode === 38){
 				direction = 'forwards';
 			} else if(keyCode === 40){
@@ -60,7 +58,8 @@
 			if(!moving){
 				var xhr = new XMLHttpRequest();
 				xhr.open('GET', '/move?direction=' + direction, false);
-				xhr.send();	
+				xhr.send();
+				moving = true;
 			}
 		};
 
