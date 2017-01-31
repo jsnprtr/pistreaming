@@ -42,6 +42,8 @@
 		var client = new WebSocket('ws://' + window.location.hostname + ':${ADDRESS}/');
 		var player = new jsmpeg(client, {canvas:canvas});
 
+		moving = false;
+
 		window.onkeydown = function(e){
 			var keyCode = e.keyCode ? e.keyCode : e.which;
 			var direction = "";
@@ -64,10 +66,10 @@
 		};
 
 		window.onkeyup = function(e){
-			moving = false;
 			var xhr = new XMLHttpRequest();
 			xhr.open('GET', '/stop');
 			xhr.send();
+			moving = false;
 		};		
 	</script>
 </body>
