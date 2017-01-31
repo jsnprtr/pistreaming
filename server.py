@@ -49,8 +49,12 @@ class StreamingHttpHandler(BaseHTTPRequestHandler):
         elif self.path == '/move':
             try:
                 data = {k: int(v[0]) for k, v in parse_qs(self.query).items()}
+                print("data is: ")
+                print data
             except (IndexError, ValueError) as e:
+                print("there was an error")
                 self.send_error(400, str(e))
+
             else:
                 if 'direction' in data:
                     direction = -data['direction']
