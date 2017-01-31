@@ -49,7 +49,7 @@ class StreamingHttpHandler(BaseHTTPRequestHandler):
             return
         elif url.path == '/move':
             try:
-                data = {k: v for k, v in parse_qs(url.query).items()}
+                data = {k: v[0] for k, v in parse_qs(url.query).items()}
                 print("data is: ")
                 print(data)
             except (IndexError, ValueError) as e:
