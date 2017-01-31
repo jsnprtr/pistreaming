@@ -58,7 +58,7 @@ class StreamingHttpHandler(BaseHTTPRequestHandler):
 
             else:
                 if 'direction' in data:
-                    direction = -data['direction']
+                    direction = data['direction']
                     if direction == 'forwards':
                         eh.motor.one.forwards()
                         eh.motor.two.forwards()
