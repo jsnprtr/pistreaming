@@ -46,9 +46,9 @@ class StreamingHttpHandler(BaseHTTPRequestHandler):
             self.send_header('Location', '/index.html')
             self.end_headers()
             return
-        elif url.path == '/move':
+        elif self.path == '/move':
             try:
-                data = {k: int(v[0]) for k, v in parse_qs(url.query).items()}
+                data = {k: int(v[0]) for k, v in parse_qs(self.query).items()}
             except (IndexError, ValueError) as e:
                 self.send_error(400, str(e))
             else:
