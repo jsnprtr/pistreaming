@@ -63,7 +63,7 @@ class StreamingHttpHandler(BaseHTTPRequestHandler):
                 self.send_response(200)
                 self.end_headers()
             return
-        elif url.path == '/stop':
+        elif self.path == '/stop':
             eh.motor.one.stop()
             eh.motor.two.stop()
         elif self.path == '/jsmpg.js':
