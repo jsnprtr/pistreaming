@@ -50,8 +50,6 @@ class StreamingHttpHandler(BaseHTTPRequestHandler):
         elif url.path == '/move':
             try:
                 data = {k: v[0] for k, v in parse_qs(url.query).items()}
-                print("data is: ")
-                print(data)
             except (IndexError, ValueError) as e:
                 print("there was an error")
                 self.send_error(400, str(e))
@@ -65,6 +63,12 @@ class StreamingHttpHandler(BaseHTTPRequestHandler):
                     elif direction == 'backwards':
                         eh.motor.one.backwards()
                         eh.motor.two.backwards()
+                    elif direction == 'left':
+                        eh.motor.one.backwards()
+                        eh.motor.two.forwards()
+                    elif direction == 'right':
+                        eh.motor.two.backwards()
+                        eh.motor.one.forwards()
                 self.send_response(200)
                 self.end_headers()
             return
