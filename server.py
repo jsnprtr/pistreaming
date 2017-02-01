@@ -103,12 +103,28 @@ class StreamingHttpHandler(BaseHTTPRequestHandler):
             self.wfile.write(content)
 
 
+def MotorHandler(self):
+    def __init__(self):
+        print("this is a test")
+
+    def run(self):
+        while True:
+            nowtime = time.time()
+            if nowtime - self.server.last_move > 2000:
+                with self.server.hat_lock:
+                    eh.motor.one.stop()
+                    eh.motor.two.stop()
+
+
 class StreamingHttpServer(HTTPServer):
     def __init__(self):
         super(StreamingHttpServer, self).__init__(
                 ('', HTTP_PORT), StreamingHttpHandler)
         self.hat_lock = Lock()
         self.last_move = 0
+        motor_handler = new MotorHandler(hat_lock)
+        motor_thread = Thread(target=motor_handler)
+        motor_thread.start()
         with io.open('index.html', 'r') as f:
             self.index_template = f.read()
         with io.open('jsmpg.js', 'r') as f:
@@ -192,20 +208,6 @@ class JasonsWebSocketRequestHandler(WebSocketWSGIRequestHandler):
         handler.request_handler = self      # backpointer for logging
         handler.run(self.server.get_app())
 
-def MotorHandler(self):
-    def __init__(self):
-        print("this is a test")
-
-    def run(self):
-        while True:
-            nowtime = time.time()
-            if nowtime - self.server.last_move > 2000:
-                with self.server.hat_lock:
-                    eh.motor.one.stop()
-                    eh.motor.two.stop()
-
-
-
 def main():
     print('Initializing camera')
     with picamera.PiCamera() as camera:
@@ -224,9 +226,6 @@ def main():
         print('Initializing HTTP server on port %d' % HTTP_PORT)
         http_server = StreamingHttpServer()
         http_thread = Thread(target=http_server.serve_forever)
-        # Thread for stopping motoros
-        motorHandler = MotorHandler(self)
-        motor_thread = Thread(target=motorHandler)
         print('Initializing broadcast thread')
         output = BroadcastOutput(camera)
         broadcast_thread = BroadcastThread(output.converter, websocket_server)
@@ -239,8 +238,6 @@ def main():
             http_thread.start()
             print('Starting broadcast thread')
             broadcast_thread.start()
-            print('Starting motor control thread')
-            motor_thread.start()
             while True:
                 camera.wait_recording(1)
         except KeyboardInterrupt:
