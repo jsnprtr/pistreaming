@@ -70,7 +70,7 @@ class StreamingHttpHandler(BaseHTTPRequestHandler):
                         elif direction == 'right':
                             eh.motor.two.backwards()
                             eh.motor.one.forwards()
-                        self.server.last_move = time.time()
+                        self.server.last_move = time()
                 self.send_response(200)
                 self.end_headers()
             return
@@ -108,7 +108,7 @@ def MotorHandler(self):
 
     def run(self):
         while True:
-            nowtime = time.time()
+            nowtime = time()
             if nowtime - self.server.last_move > 2000:
                 with self.server.hat_lock:
                     eh.motor.one.stop()
