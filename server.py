@@ -21,7 +21,6 @@ from ws4py.server.wsgirefserver import WSGIServer, WebSocketWSGIRequestHandler, 
 from ws4py.server.wsgiutils import WebSocketWSGIApplication
 
 import explorerhat as eh
-import time
 
 ###########################################
 # CONFIGURATION
