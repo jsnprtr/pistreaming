@@ -21,6 +21,7 @@ from ws4py.server.wsgirefserver import WSGIServer, WebSocketWSGIRequestHandler, 
 from ws4py.server.wsgiutils import WebSocketWSGIApplication
 
 import explorerhat as eh
+import time
 
 ###########################################
 # CONFIGURATION
@@ -55,20 +56,22 @@ class StreamingHttpHandler(BaseHTTPRequestHandler):
                 self.send_error(400, str(e))
 
             else:
-                if 'direction' in data:
-                    direction = data['direction']
-                    if direction == 'forwards':
-                        eh.motor.one.forwards()
-                        eh.motor.two.forwards()
-                    elif direction == 'backwards':
-                        eh.motor.one.backwards()
-                        eh.motor.two.backwards()
-                    elif direction == 'left':
-                        eh.motor.one.backwards()
-                        eh.motor.two.forwards()
-                    elif direction == 'right':
-                        eh.motor.two.backwards()
-                        eh.motor.one.forwards()
+                with self.server.hat_lock:
+                    if 'direction' in data:
+                        direction = data['direction']
+                        if direction == 'forwards':
+                            eh.motor.one.forwards()
+                            eh.motor.two.forwards()
+                        elif direction == 'backwards':
+                            eh.motor.one.backwards()
+                            eh.motor.two.backwards()
+                        elif direction == 'left':
+                            eh.motor.one.backwards()
+                            eh.motor.two.forwards()
+                        elif direction == 'right':
+                            eh.motor.two.backwards()
+                            eh.motor.one.forwards()
+                        self.server.last_move = time.time()
                 self.send_response(200)
                 self.end_headers()
             return
@@ -104,6 +107,8 @@ class StreamingHttpServer(HTTPServer):
     def __init__(self):
         super(StreamingHttpServer, self).__init__(
                 ('', HTTP_PORT), StreamingHttpHandler)
+        self.hat_lock = Lock()
+        self.last_move = 0
         with io.open('index.html', 'r') as f:
             self.index_template = f.read()
         with io.open('jsmpg.js', 'r') as f:
@@ -187,6 +192,16 @@ class JasonsWebSocketRequestHandler(WebSocketWSGIRequestHandler):
         handler.request_handler = self      # backpointer for logging
         handler.run(self.server.get_app())
 
+class MotorHandler():
+    def run(self):
+        while True:
+            nowtime = time.time()
+            if nowtime - self.server.last_move > 2000:
+                with self.server.hat_lock:
+                    eh.motor.one.stop()
+                    eh.motor.two.stop()
+
+
 
 def main():
     print('Initializing camera')
@@ -206,6 +221,9 @@ def main():
         print('Initializing HTTP server on port %d' % HTTP_PORT)
         http_server = StreamingHttpServer()
         http_thread = Thread(target=http_server.serve_forever)
+        # Thread for stopping motoros
+        motorHandler = MotorHandler()
+        motor_thread = Thread(target=motorHandler)
         print('Initializing broadcast thread')
         output = BroadcastOutput(camera)
         broadcast_thread = BroadcastThread(output.converter, websocket_server)
@@ -218,6 +236,8 @@ def main():
             http_thread.start()
             print('Starting broadcast thread')
             broadcast_thread.start()
+            print('Starting motor control thread')
+            motor_thread.start()
             while True:
                 camera.wait_recording(1)
         except KeyboardInterrupt:
