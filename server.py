@@ -7,7 +7,7 @@ import shutil
 from subprocess import Popen, PIPE
 from string import Template
 from struct import Struct
-from threading import Thread
+from threading import Thread, Lock
 from time import sleep, time
 from http.server import HTTPServer, BaseHTTPRequestHandler
 from wsgiref.simple_server import make_server
