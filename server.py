@@ -192,13 +192,16 @@ class JasonsWebSocketRequestHandler(WebSocketWSGIRequestHandler):
         handler.request_handler = self      # backpointer for logging
         handler.run(self.server.get_app())
 
-def handleMotor(self):
-    while True:
-        nowtime = time.time()
-        if nowtime - self.server.last_move > 2000:
-            with self.server.hat_lock:
-                eh.motor.one.stop()
-                eh.motor.two.stop()
+def MotorHandler(self):
+    def __init__(self):
+        print("this is a test")
+    def run(self):self
+        while True:
+            nowtime = time.time()
+            if nowtime - self.server.last_move > 2000:
+                with self.server.hat_lock:
+                    eh.motor.one.stop()
+                    eh.motor.two.stop()
 
 
 
@@ -220,8 +223,9 @@ def main():
         print('Initializing HTTP server on port %d' % HTTP_PORT)
         http_server = StreamingHttpServer()
         http_thread = Thread(target=http_server.serve_forever)
-        # Thread for stopping motors
-        motor_thread = Thread(target=handleMotor)
+        # Thread for stopping motoros
+        motorHandler = MotorHandler(self)
+        motor_thread = Thread(target=motorHandler)
         print('Initializing broadcast thread')
         output = BroadcastOutput(camera)
         broadcast_thread = BroadcastThread(output.converter, websocket_server)
