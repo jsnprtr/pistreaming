@@ -195,7 +195,8 @@ class JasonsWebSocketRequestHandler(WebSocketWSGIRequestHandler):
 def MotorHandler(self):
     def __init__(self):
         print("this is a test")
-    def run(self):self
+
+    def run(self):
         while True:
             nowtime = time.time()
             if nowtime - self.server.last_move > 2000:
