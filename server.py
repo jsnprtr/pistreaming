@@ -122,7 +122,7 @@ class StreamingHttpServer(HTTPServer):
                 ('', HTTP_PORT), StreamingHttpHandler)
         self.hat_lock = Lock()
         self.last_move = 0
-        motor_handler = MotorHandler(hat_lock)
+        motor_handler = MotorHandler(self.hat_lock)
         motor_thread = Thread(target=motor_handler)
         motor_thread.start()
         with io.open('index.html', 'r') as f:
